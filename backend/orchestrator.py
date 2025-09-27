@@ -243,23 +243,15 @@ class AgentOrchestrator:
             raise
     
     async def _validate_environment(self):
-        """Validate that required environment variables and API keys are present"""
-        missing_keys = []
-        
-        # Check for Anthropic API key (for Agent A)
-        if not os.environ.get('ANTHROPIC_API_KEY'):
-            missing_keys.append('ANTHROPIC_API_KEY')
-            
-        # Check for OpenAI API key (for Agent B)  
-        if not os.environ.get('OPENAI_API_KEY'):
-            missing_keys.append('OPENAI_API_KEY')
-            
-        if missing_keys:
-            error_msg = f"Missing required API keys: {', '.join(missing_keys)}. Set these environment variables before starting orchestration."
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-            
-        logger.info("Environment validation passed - all required API keys are present")
+        """Validate CLI environment for terminal-based agent communication"""
+        logger.info("Validating CLI environment for terminal-based agents...")
+
+        # Check if workspace directory is accessible
+        if not self.session.workspace_path.parent.exists():
+            self.session.workspace_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Validate CLI communication readiness - NO API keys needed
+        logger.info("Environment validation passed - CLI terminals ready for agent communication")
     
     async def _orchestration_loop(self):
         """

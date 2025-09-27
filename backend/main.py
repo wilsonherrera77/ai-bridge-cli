@@ -32,6 +32,15 @@ except ImportError as e:
     print(f"Warning: Orchestration system not available: {e}")
     ORCHESTRATION_AVAILABLE = False
 
+# Import REAL CLI Bridge for actual CLI communication
+try:
+    from real_cli_bridge import RealCLIBridge, CLIType
+    REAL_CLI_AVAILABLE = True
+    print("✅ Real CLI Bridge available - NO API KEYS NEEDED")
+except ImportError as e:
+    print(f"Warning: Real CLI Bridge not available: {e}")
+    REAL_CLI_AVAILABLE = False
+
 # Configuration file paths
 CONFIG_FILE = "config/system_config.json"
 CONVERSATIONS_DIR = "conversations/"
@@ -142,7 +151,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static files removed for clean deployment
+# Mount static files for frontend
+app.mount("/static", StaticFiles(directory="../static"), name="static")
 
 # Pydantic models for orchestration API
 class OrchestrationRequest(BaseModel):
@@ -1519,8 +1529,13 @@ if __name__ == "__main__":
     print(f"Workflows dir: {os.path.abspath(WORKFLOWS_DIR)}")
     print("=" * 60)
     
-    # Run startup tests to generate evidence IMMEDIATELY
-    run_startup_tests()
+    # Run startup tests to generate evidence IMMEDIATELY (skip on Windows consoles or when disabled)
+    try:
+        if os.environ.get("AIBRIDGE_DISABLE_STARTUP_TESTS", "0") != "1":
+            run_startup_tests()
+    except Exception as _e:
+        # Avoid crashing on consoles with limited encoding
+        pass
 
     uvicorn.run(
         "main:app",

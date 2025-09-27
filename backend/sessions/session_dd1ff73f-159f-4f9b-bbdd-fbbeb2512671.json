@@ -1,0 +1,25 @@
+{
+  "id": "dd1ff73f-159f-4f9b-bbdd-fbbeb2512671",
+  "objective": "Begin autonomous development session",
+  "config": {
+    "max_iterations": 50,
+    "timeout_minutes": 60,
+    "auto_approve": true,
+    "logging_level": "INFO",
+    "workspace_dir": "workspace/",
+    "save_conversations": true,
+    "enable_reflection": true,
+    "conflict_resolution": "agent_a_priority"
+  },
+  "state": "failed",
+  "created_at": "2025-09-27T02:05:25.333063+00:00",
+  "started_at": null,
+  "completed_at": null,
+  "current_iteration": 0,
+  "agents_status": {
+    "agent_a": "AgentStatus.ERROR",
+    "agent_b": "AgentStatus.ERROR"
+  },
+  "workspace_path": "workspace\\session_dd1ff73f-159f-4f9b-bbdd-fbbeb2512671",
+  "error_message": "Missing required API keys: ANTHROPIC_API_KEY, OPENAI_API_KEY. Set these environment variables before starting orchestration."
+}

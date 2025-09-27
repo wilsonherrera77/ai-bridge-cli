@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Bridge - Interfaz de Tareas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .task-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .button:hover {
+            background: #45a049;
+        }
+        .button.secondary {
+            background: #2196F3;
+        }
+        .button.secondary:hover {
+            background: #1976D2;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .status.success { background: #4CAF50; }
+        .status.error { background: #f44336; }
+        .status.info { background: #2196F3; }
+        .quick-tasks {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .quick-task {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .quick-task:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI-Bridge - Interfaz de Tareas</h1>
+
+        <h3>Tareas Rápidas:</h3>
+        <div class="quick-tasks">
+            <div class="quick-task" onclick="setTask('Crear una aplicación web de lista de tareas con React frontend y FastAPI backend')">
+                📝 Todo App
+            </div>
+            <div class="quick-task" onclick="setTask('Desarrollar una calculadora web con HTML, CSS, JavaScript frontend y Python backend')">
+                🧮 Calculadora Web
+            </div>
+            <div class="quick-task" onclick="setTask('Crear un sistema de blog con posts, comentarios y administración')">
+                📚 Sistema Blog
+            </div>
+            <div class="quick-task" onclick="setTask('Construir un dashboard de analytics con gráficos y métricas en tiempo real')">
+                📊 Dashboard Analytics
+            </div>
+        </div>
+
+        <h3>O describe tu tarea personalizada:</h3>
+        <textarea id="taskInput" class="task-input" rows="4"
+                  placeholder="Describe lo que quieres que hagan tus agentes AI. Ejemplo: 'Crear una tienda online con carrito de compras, frontend React y backend con API REST'">
+        </textarea>
+
+        <div style="text-align: center;">
+            <button class="button" onclick="sendTask()">🚀 Enviar Tarea a Agentes</button>
+            <button class="button secondary" onclick="checkStatus()">📊 Ver Estado</button>
+            <button class="button secondary" onclick="openControlCabin()">🎛️ Control Cabin</button>
+        </div>
+
+        <div id="result" class="result" style="display: none;">
+            <h3>Resultado:</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        function setTask(task) {
+            document.getElementById('taskInput').value = task;
+        }
+
+        async function sendTask() {
+            const task = document.getElementById('taskInput').value.trim();
+            if (!task) {
+                showResult('error', 'Por favor describe una tarea');
+                return;
+            }
+
+            showResult('info', 'Enviando tarea a los agentes AI...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/orchestration/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        objective: task
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showResult('success', `
+                        <strong>✅ Tarea enviada exitosamente!</strong><br>
+                        Session ID: ${result.session_id}<br>
+                        Status: ${result.status}<br>
+                        Message: ${result.message}<br><br>
+                        <strong>Monitoreo:</strong><br>
+                        • Control Cabin: <a href="http://localhost:5002" target="_blank">http://localhost:5002</a><br>
+                        • API Status: <a href="${API_BASE}/api/orchestration/status" target="_blank">Ver Status</a>
+                    `);
+                } else {
+                    const error = await response.json();
+                    showResult('error', `
+                        <strong>⚠️ Info del sistema:</strong><br>
+                        ${error.detail}<br><br>
+                        <strong>Alternativas:</strong><br>
+                        • Usar Real CLI Bridge directo<br>
+                        • Configurar agents manualmente<br>
+                        • Usar Python/Node como fallback
+                    `);
+                }
+            } catch (error) {
+                showResult('error', `Error de conexión: ${error.message}`);
+            }
+        }
+
+        async function checkStatus() {
+            showResult('info', 'Verificando estado del sistema...');
+
+            try {
+                const healthResponse = await fetch(`${API_BASE}/api/health`);
+                const health = await healthResponse.json();
+
+                const statusResponse = await fetch(`${API_BASE}/api/orchestration/status`);
+                const status = await statusResponse.json();
+
+                showResult('info', `
+                    <strong>🟢 Estado del Sistema:</strong><br>
+                    Health: ${health.status} (v${health.version})<br>
+                    Orchestration: ${health.orchestration_available ? 'Disponible' : 'No disponible'}<br>
+                    Connections: ${health.active_connections}<br><br>
+                    <strong>📊 Session Status:</strong><br>
+                    Session ID: ${status.session_id || 'N/A'}<br>
+                    State: ${status.state || 'N/A'}<br>
+                    Iteration: ${status.current_iteration || 0}<br>
+                    Workspace: ${status.workspace || 'N/A'}
+                `);
+            } catch (error) {
+                showResult('error', `Error verificando estado: ${error.message}`);
+            }
+        }
+
+        function openControlCabin() {
+            window.open('http://localhost:5002', '_blank');
+        }
+
+        function showResult(type, message) {
+            const result = document.getElementById('result');
+            const content = document.getElementById('resultContent');
+
+            content.innerHTML = `<div class="status ${type}">${message}</div>`;
+            result.style.display = 'block';
+        }
+
+        // Check system status on load
+        window.onload = function() {
+            checkStatus();
+        };
+    </script>
+</body>
+</html>

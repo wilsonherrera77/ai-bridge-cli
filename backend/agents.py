@@ -22,8 +22,9 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 import logging
 
-# CLI Terminal Integration - NO API KEYS
-# Real CLI process communication using existing paid memberships
+# Real CLI Bridge Integration - NO API KEYS
+# Real CLI process communication using actual terminals
+from real_cli_bridge import RealCLIBridge, CLIType, real_cli_bridge
 from terminal_manager import TerminalManager, TerminalType, ProcessStatus
 from cli_orchestrator import CLIOrchestrator
 from process_communicator import ProcessCommunicator
@@ -90,9 +91,10 @@ class AgentConfig:
 
 class BaseAgent(ABC):
     """
-    Enhanced abstract base class for AI agents with autonomous communication capabilities.
-    
+    Enhanced abstract base class for AI agents with real CLI communication capabilities.
+
     Features:
+    - Real CLI process management and communication
     - Smart context processing for incoming messages
     - Output formatting for target agent communication
     - Integration with message transformation engine

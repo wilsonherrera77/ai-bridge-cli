@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Bridge Control Cabin</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>🤖 AI-Bridge</h1>
+                <span class="subtitle">Autonomous AI Development Team</span>
+            </div>
+            <div class="system-status" id="systemStatus">
+                <span class="status-indicator" id="statusIndicator">●</span>
+                <span id="statusText">Initializing...</span>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard">
+            <!-- Control Panel -->
+            <section class="control-panel">
+                <h2>🎯 Mission Control</h2>
+
+                <!-- Objective Input -->
+                <div class="objective-section">
+                    <label for="objectiveInput">Development Objective:</label>
+                    <textarea
+                        id="objectiveInput"
+                        placeholder="Describe what you want the AI team to build or solve..."
+                        rows="3"
+                    ></textarea>
+                </div>
+
+                <!-- Configuration Panel -->
+                <div class="config-section">
+                    <h3>🔧 Configuration</h3>
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <label for="reflectionMode">Reflection Mode:</label>
+                            <select id="reflectionMode">
+                                <option value="auto">Auto (Fast)</option>
+                                <option value="critical">Critical (Thorough)</option>
+                                <option value="collaborative">Collaborative (Intensive)</option>
+                                <option value="expert" selected>Expert (Unlimited Time)</option>
+                            </select>
+                        </div>
+
+                        <div class="config-item">
+                            <label for="maxIterations">Max Iterations:</label>
+                            <input type="number" id="maxIterations" value="50" min="1" max="1000">
+                        </div>
+
+                        <div class="config-item">
+                            <label>
+                                <input type="checkbox" id="autoApprove" checked>
+                                Auto-approve actions
+                            </label>
+                        </div>
+
+                        <div class="config-item">
+                            <label>
+                                <input type="checkbox" id="saveConversations" checked>
+                                Save conversations
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="startOrchestration" class="btn btn-primary">
+                        🚀 Start Collaboration
+                    </button>
+                    <button id="pauseOrchestration" class="btn btn-secondary" disabled>
+                        ⏸️ Pause
+                    </button>
+                    <button id="stopOrchestration" class="btn btn-danger" disabled>
+                        ⏹️ Stop
+                    </button>
+                </div>
+            </section>
+
+            <!-- Agents Status -->
+            <section class="agents-panel">
+                <h2>🤝 AI Agents Status</h2>
+                <div class="agents-grid">
+                    <!-- Agent A -->
+                    <div class="agent-card" id="agentA">
+                        <div class="agent-header">
+                            <h3>🎨 Agent A (Frontend)</h3>
+                            <span class="agent-status" id="agentAStatus">idle</span>
+                        </div>
+                        <div class="agent-details">
+                            <p><strong>Role:</strong> Frontend Specialist</p>
+                            <p><strong>Status:</strong> <span id="agentADetailStatus">Waiting for assignment</span></p>
+                            <p><strong>Messages:</strong> <span id="agentAMessages">0</span></p>
+                            <p><strong>Last Activity:</strong> <span id="agentALastActivity">Never</span></p>
+                        </div>
+                        <div class="agent-actions">
+                            <button class="btn-small" onclick="pauseAgent('agent_a')">Pause</button>
+                            <button class="btn-small" onclick="resumeAgent('agent_a')">Resume</button>
+                        </div>
+                    </div>
+
+                    <!-- Agent B -->
+                    <div class="agent-card" id="agentB">
+                        <div class="agent-header">
+                            <h3>⚙️ Agent B (Backend)</h3>
+                            <span class="agent-status" id="agentBStatus">idle</span>
+                        </div>
+                        <div class="agent-details">
+                            <p><strong>Role:</strong> Backend Specialist</p>
+                            <p><strong>Status:</strong> <span id="agentBDetailStatus">Waiting for assignment</span></p>
+                            <p><strong>Messages:</strong> <span id="agentBMessages">0</span></p>
+                            <p><strong>Last Activity:</strong> <span id="agentBLastActivity">Never</span></p>
+                        </div>
+                        <div class="agent-actions">
+                            <button class="btn-small" onclick="pauseAgent('agent_b')">Pause</button>
+                            <button class="btn-small" onclick="resumeAgent('agent_b')">Resume</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Interactions -->
+            <section class="interactions-panel">
+                <h2>💬 Live Interactions</h2>
+                <div class="interactions-container">
+                    <div id="conversationFeed" class="conversation-feed">
+                        <div class="message system-message">
+                            <span class="timestamp">[System]</span>
+                            <span class="content">AI-Bridge Control Cabin initialized. Ready for autonomous collaboration.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Metrics Dashboard -->
+            <section class="metrics-panel">
+                <h2>📊 Session Metrics</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>Total Messages</h4>
+                        <span class="metric-value" id="totalMessages">0</span>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Handoffs</h4>
+                        <span class="metric-value" id="totalHandoffs">0</span>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Progress</h4>
+                        <span class="metric-value" id="projectProgress">0%</span>
+                    </div>
+                    <div class="metric-card">
+                        <h4>System Health</h4>
+                        <span class="metric-value" id="systemHealth">100%</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- WebSocket Status -->
+    <div id="wsStatus" class="ws-status">🔴 Disconnected</div>
+
+    <script src="app.js"></script>
+</body>
+</html>
