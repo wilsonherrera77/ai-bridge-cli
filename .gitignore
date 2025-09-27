@@ -1,0 +1,21 @@
+﻿# Python
+__pycache__/
+*.pyc
+.env
+.venv/
+
+# Node/Frontend
+node_modules/
+dist/
+build/
+
+# Herramientas locales
+.local/
+.config/
+.replit
+.claude/
+npm-debug.log*
+
+# SO/editores
+.DS_Store
+Thumbs.db

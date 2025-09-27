@@ -1,0 +1,22 @@
+{
+  "default_base_dir": "workspace/demo_project",
+  "auto_save_conversations": true,
+  "auto_save_workflows": true,
+  "max_conversation_history": 1000,
+  "yes_all_claude_a": true,
+  "yes_all_claude_b": true,
+  "reflection_mode": "expert",
+  "require_justification": true,
+  "cross_validation": true,
+  "ask_for_clarification": true,
+  "unlimited_iterations": true,
+  "smart_completion": true,
+  "execution_philosophy": "goal_oriented",
+  "enable_real_cli_communication": true,
+  "cli_tools_available": {
+    "claude": "1.0.127",
+    "openai": "1.102.0",
+    "python": "3.13.7",
+    "node": "v24.6.0"
+  }
+}

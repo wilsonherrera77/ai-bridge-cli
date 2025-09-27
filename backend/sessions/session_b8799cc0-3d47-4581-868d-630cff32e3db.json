@@ -1,0 +1,25 @@
+{
+  "id": "b8799cc0-3d47-4581-868d-630cff32e3db",
+  "objective": "Objetivo. Construir un motor de descubrimiento en tiempo real para web y redes sociales que ingiera una hoja de Excel con temas/consultas y semillas opcionales (URLs/cuentas), expanda consultas, busque de forma exhaustiva m\u00e1s all\u00e1 de las semillas, rastree con profundidad configurable, extraiga y normalice metadatos y texto principal, canonice y deduplique, punt\u00fae por relevancia/recencia/diversidad y ejecute de forma continua en un intervalo configurable.\n\nEntradas y capacidades. Hoja Excel con columnas: topic, query?, platform?, seed_url?, account?, lang?, region?, depth?, recency_days?. Usar m\u00faltiples proveedores (b\u00fasqueda web general, RSS cuando exista, Reddit, YouTube, X/Twitter y otros) mediante una interfaz modular de \u201cproviders\u201d para enchufar nuevas fuentes. Implementar concurrencia configurable, retries, l\u00edmites por dominio; extraer title, text, author, published_at, domain y aplicar scoring ligero.\n\nCriterios de aceptaci\u00f3n. Proveer una CLI (--excel, --continuous, --interval, --max-per-topic, --max-crawl-per-domain, --depth, etc.), ejecutar con un Excel de ejemplo, descubrir \u00edtems m\u00e1s all\u00e1 de las semillas, evitar duplicados entre rondas y emitir salidas estructuradas (p. ej., JSONL/CSV/SQLite/Excel resumen) con destinos y formatos totalmente configurables por el usuario; incluir logs claros y pruebas m\u00ednimas para normalizaci\u00f3n/deduplicaci\u00f3n/scoring.",
+  "config": {
+    "max_iterations": 50,
+    "timeout_minutes": 60,
+    "auto_approve": true,
+    "logging_level": "INFO",
+    "workspace_dir": "workspace/",
+    "save_conversations": true,
+    "enable_reflection": true,
+    "conflict_resolution": "agent_a_priority"
+  },
+  "state": "failed",
+  "created_at": "2025-09-27T04:07:43.144288+00:00",
+  "started_at": null,
+  "completed_at": null,
+  "current_iteration": 0,
+  "agents_status": {
+    "agent_a": "AgentStatus.ERROR",
+    "agent_b": "AgentStatus.ERROR"
+  },
+  "workspace_path": "workspace\\session_b8799cc0-3d47-4581-868d-630cff32e3db",
+  "error_message": "Agent A (Frontend) initialization failed - check API keys and configuration"
+}

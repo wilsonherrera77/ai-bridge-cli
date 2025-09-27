@@ -1,0 +1,25 @@
+{
+  "id": "0a8c48e3-ad1f-4aa1-ac68-eec47f04d942",
+  "objective": "Crear una aplicacion web con React y FastAPI",
+  "config": {
+    "max_iterations": 50,
+    "timeout_minutes": 60,
+    "auto_approve": true,
+    "logging_level": "INFO",
+    "workspace_dir": "workspace/",
+    "save_conversations": true,
+    "enable_reflection": true,
+    "conflict_resolution": "agent_a_priority"
+  },
+  "state": "failed",
+  "created_at": "2025-09-27T03:17:11.149327+00:00",
+  "started_at": null,
+  "completed_at": null,
+  "current_iteration": 0,
+  "agents_status": {
+    "agent_a": "AgentStatus.ERROR",
+    "agent_b": "AgentStatus.ERROR"
+  },
+  "workspace_path": "workspace\\session_0a8c48e3-ad1f-4aa1-ac68-eec47f04d942",
+  "error_message": "Agent B (Backend) initialization failed - check API keys and configuration"
+}

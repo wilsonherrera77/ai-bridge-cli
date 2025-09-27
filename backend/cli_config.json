@@ -1,0 +1,43 @@
+{
+  "cli_agents": {
+    "agent_a": {
+      "type": "claude_cli",
+      "command": ["claude", "chat"],
+      "working_dir": "workspace",
+      "timeout": 60,
+      "role": "frontend_specialist",
+      "specialization": "React, Vue, Angular, UI/UX, Frontend development"
+    },
+    "agent_b": {
+      "type": "openai_cli",
+      "command": ["openai", "api", "chat.completions.create"],
+      "working_dir": "workspace",
+      "timeout": 60,
+      "role": "backend_specialist",
+      "specialization": "FastAPI, Express, Django, Backend APIs, Database design"
+    }
+  },
+  "fallback_agents": {
+    "agent_a_fallback": {
+      "type": "python_repl",
+      "command": ["python", "-i"],
+      "working_dir": "workspace",
+      "timeout": 30,
+      "role": "frontend_specialist"
+    },
+    "agent_b_fallback": {
+      "type": "node_repl",
+      "command": ["node", "--interactive"],
+      "working_dir": "workspace",
+      "timeout": 30,
+      "role": "backend_specialist"
+    }
+  },
+  "system_config": {
+    "auto_detect_cli": true,
+    "use_fallback_on_error": true,
+    "max_retries": 3,
+    "enable_real_cli_bridge": true,
+    "cli_validation": true
+  }
+}
