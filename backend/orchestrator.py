@@ -24,9 +24,16 @@ from enum import Enum
 import logging
 
 # Import agent classes and communication system
-from agents import AgentA, AgentB, AgentRole, AgentStatus
+from agents import AgentA, AgentB, AgentRole, AgentStatus, AgentConfig
 from communication import MessageBus, Message, MessageType
 from workflow import WorkflowEngine, WorkflowState, WorkflowPhase
+
+class AutonomyLevel(Enum):
+    """Niveles de autonomía para perseguir el objetivo"""
+    LOW = "low"                    # Básico, requiere intervención frecuente
+    MEDIUM = "medium"              # Moderado, cierta autonomía
+    HIGH = "high"                  # Alto, autonomía casi completa
+    MAX = "max"                    # Máximo, persigue objetivo hasta completarlo a toda costa
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -45,14 +52,17 @@ class OrchestrationState(Enum):
 @dataclass
 class OrchestrationConfig:
     """Configuration for orchestration session"""
-    max_iterations: int = 50
-    timeout_minutes: int = 60
+    autonomy_level: AutonomyLevel = AutonomyLevel.MAX  # Nivel de autonomía por defecto
+    max_iterations: int = None  # Sin límite por defecto (None = ilimitado)
+    timeout_minutes: int = None  # Sin límite de tiempo por defecto  
     auto_approve: bool = True
     logging_level: str = "INFO"
     workspace_dir: str = "workspace"
     save_conversations: bool = True
     enable_reflection: bool = True
     conflict_resolution: str = "agent_a_priority"  # or "agent_b_priority", "human_intervention"
+    expert_mode: bool = True  # Agentes actúan como expertos mundiales
+    persistence_mode: bool = True  # Perseguir objetivo hasta completarlo
 
 @dataclass
 class OrchestrationSession:
@@ -93,9 +103,17 @@ class AgentOrchestrator:
         self.message_bus = MessageBus()
         self.workflow_engine = WorkflowEngine()
         
-        # Initialize agents
-        self.agent_a = AgentA(role=AgentRole.FRONTEND)
-        self.agent_b = AgentB(role=AgentRole.BACKEND)
+        # Initialize world-class expert agents with maximum autonomy configuration
+        expert_config = AgentConfig(
+            enable_reflection=True,
+            save_memory=True,
+            memory_limit=10000,  # Increased memory for complex projects
+            auto_restart=True,
+            timeout_seconds=300   # Longer timeout for complex thinking
+        )
+        
+        self.agent_a = AgentA(role=AgentRole.FRONTEND, config=expert_config)
+        self.agent_b = AgentB(role=AgentRole.BACKEND, config=expert_config)
         
         # Session storage
         self.sessions_dir = Path("sessions")

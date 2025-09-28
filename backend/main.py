@@ -256,7 +256,7 @@ class ConnectionManager:
                     agent_b_status = await orchestrator.agent_b.get_status() if orchestrator.agent_b else "idle"
                     
                     # Get message bus activity if available
-                    message_count = len(orchestrator.message_bus.conversation_threads) if orchestrator.message_bus else 0
+                    message_count = len(orchestrator.message_bus.conversations) if orchestrator.message_bus else 0
                     
                     # Broadcast real system state
                     await self.broadcast(json.dumps({
@@ -1539,7 +1539,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
+        host="localhost",
         port=8000,
         reload=True,
         log_level="info"
