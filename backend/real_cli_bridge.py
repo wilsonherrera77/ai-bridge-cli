@@ -359,64 +359,127 @@ class RealCLIBridge:
         logger.info(f"Agent {agent_id} responded: {response[:100]}...")
         return response
 
-    async def facilitate_conversation(self, agent_a_id: str, agent_b_id: str, objective: str) -> Dict[str, Any]:
-        """Facilitate real conversation between two agents"""
+    async def facilitate_conversation(self, agent_a_id: str, agent_b_id: str, objective: str, autonomy_level: str = "max") -> Dict[str, Any]:
+        """Facilitate real conversation between two agents with unlimited autonomy"""
 
         if agent_a_id not in self.agents or agent_b_id not in self.agents:
             return {"error": "One or both agents not found"}
 
         self.is_active = True
         conversation_history = []
+        round_num = 0
 
         try:
-            # Initial setup - give each agent the objective
-            setup_message = f"Objective: {objective}\nYou are working with another agent to accomplish this. Please provide your approach and what you need from the other agent."
+            # Initial setup - give each agent expert-level context
+            expert_setup = f"""EXPERT MISSION BRIEFING:
 
-            response_a = await self.send_message_to_agent(agent_a_id, setup_message)
-            response_b = await self.send_message_to_agent(agent_b_id, setup_message)
+OBJECTIVE: {objective}
+
+You are a WORLD-CLASS EXPERT in your specialization. Act with the knowledge, experience, and authority of the top 1% professionals in your field.
+
+AUTONOMY LEVEL: MAXIMUM
+- Pursue this objective with professional excellence
+- Continue until COMPLETELY accomplished
+- No artificial limits or constraints
+- Make executive decisions as needed
+- Collaborate intelligently with your expert colleague
+
+Expected behavior: World-class professional standards, thorough execution, complete objective achievement.
+
+Provide your expert analysis and approach. What do you need from the other expert to achieve total success?"""
+
+            response_a = await self.send_message_to_agent(agent_a_id, expert_setup)
+            response_b = await self.send_message_to_agent(agent_b_id, expert_setup)
 
             conversation_history.extend([
-                {"agent": agent_a_id, "message": setup_message, "response": response_a},
-                {"agent": agent_b_id, "message": setup_message, "response": response_b}
+                {"agent": agent_a_id, "message": expert_setup, "response": response_a, "round": 0},
+                {"agent": agent_b_id, "message": expert_setup, "response": response_b, "round": 0}
             ])
 
-            # Facilitate back-and-forth conversation
+            # Unlimited autonomous collaboration until objective completion
             current_agent = agent_a_id
             other_agent = agent_b_id
+            consecutive_completion_signals = 0
+            no_progress_counter = 0
+            last_significant_progress = ""
 
-            for round_num in range(10):  # Max 10 rounds
-                # Prepare context message with other agent's last response
+            while True:  # UNLIMITED ROUNDS - continue until objective is achieved
+                round_num += 1
+                
+                # Prepare expert-level context message
                 if len(conversation_history) >= 2:
                     last_other_response = conversation_history[-2]["response"] if current_agent == agent_a_id else conversation_history[-1]["response"]
-                    context_message = f"The other agent said: '{last_other_response}'\n\nPlease respond and continue working toward the objective: {objective}"
-                else:
-                    context_message = f"Continue working on: {objective}"
+                    expert_context = f"""EXPERT COLLABORATION - Round {round_num}
 
-                # Get response from current agent
-                response = await self.send_message_to_agent(current_agent, context_message)
+Your expert colleague's latest contribution:
+"{last_other_response}"
+
+OBJECTIVE STATUS: {objective}
+
+As a world-class expert, analyze their contribution and provide your professional response:
+1. What has been accomplished so far?
+2. What specific next steps are needed?
+3. What do you need from your colleague?
+4. How close are we to COMPLETE objective achievement?
+
+Continue with expert-level execution until the objective is COMPLETELY fulfilled."""
+                else:
+                    expert_context = f"EXPERT CONTINUATION - Round {round_num}\n\nObjective: {objective}\n\nAs a world-class expert, continue your professional work toward complete objective achievement."
+
+                # Get expert response from current agent
+                response = await self.send_message_to_agent(current_agent, expert_context)
 
                 conversation_history.append({
                     "agent": current_agent,
-                    "message": context_message,
+                    "message": expert_context,
                     "response": response,
-                    "round": round_num + 1
+                    "round": round_num
                 })
 
-                # Check if objective is complete
-                if any(phrase in response.lower() for phrase in ["complete", "finished", "done", "accomplished"]):
-                    break
+                # Intelligent completion detection
+                completion_indicators = [
+                    "objective completed", "fully accomplished", "task finished", 
+                    "implementation complete", "project completed", "goal achieved",
+                    "successfully delivered", "fully functional", "ready for production",
+                    "completely implemented", "objective fulfilled", "mission accomplished"
+                ]
+                
+                response_lower = response.lower()
+                
+                # Check for genuine completion signals
+                if any(indicator in response_lower for indicator in completion_indicators):
+                    consecutive_completion_signals += 1
+                    if consecutive_completion_signals >= 2:  # Both agents must confirm completion
+                        logger.info(f"Objective achieved after {round_num} rounds of expert collaboration")
+                        break
+                else:
+                    consecutive_completion_signals = 0
 
-                # Switch agents
+                # Progress tracking
+                if response != last_significant_progress:
+                    last_significant_progress = response
+                    no_progress_counter = 0
+                else:
+                    no_progress_counter += 1
+                    
+                # Safety valve: If no progress for many rounds, but still allow continuation
+                if no_progress_counter > 50:  # Much higher threshold
+                    logger.warning(f"No progress detected for {no_progress_counter} rounds, but continuing...")
+                    no_progress_counter = 0  # Reset and continue
+
+                # Switch agents for continued collaboration
                 current_agent, other_agent = other_agent, current_agent
 
-                # Small delay between rounds
-                await asyncio.sleep(2)
+                # Brief pause for processing
+                await asyncio.sleep(1)
 
             return {
                 "success": True,
                 "conversation_history": conversation_history,
-                "total_rounds": len(conversation_history),
-                "agents": [agent_a_id, agent_b_id]
+                "total_rounds": round_num,
+                "agents": [agent_a_id, agent_b_id],
+                "autonomy_level": autonomy_level,
+                "completion_reason": "objective_achieved" if consecutive_completion_signals >= 2 else "manual_stop"
             }
 
         except Exception as e:
