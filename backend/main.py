@@ -1473,6 +1473,144 @@ async def workspace_status():
         "config_file_path": os.path.abspath(CONFIG_FILE) if os.path.exists(CONFIG_FILE) else None
     }
 
+# ========================================
+# PROJECT GUIDE TOOL ENDPOINTS
+# ========================================
+
+# Import Project Guide Engine
+try:
+    from project_guide import (
+        ProjectGuideEngine,
+        ProjectType,
+        ValidationLevel,
+        create_fullstack_project,
+        validate_and_correct,
+        get_project_guidance
+    )
+    PROJECT_GUIDE_AVAILABLE = True
+    print("✅ Project Guide Tool available")
+except ImportError as e:
+    print(f"Warning: Project Guide Tool not available: {e}")
+    PROJECT_GUIDE_AVAILABLE = False
+
+# Pydantic models for Project Guide
+class CreateProjectRequest(BaseModel):
+    project_name: str
+    project_type: str = "react_fastapi"  # react_fastapi, nextjs_fastapi, react_node_express, fullstack_monorepo
+    validation_level: str = "professional"  # basic, standard, professional, production
+
+class ValidateProjectRequest(BaseModel):
+    project_name: str
+    validation_level: str = "standard"
+    auto_correct: bool = True
+
+class ProjectGuidanceRequest(BaseModel):
+    project_name: str
+
+@app.post("/api/project/create")
+async def create_project(request: CreateProjectRequest):
+    """Crea un nuevo proyecto full stack con template y guía"""
+    if not PROJECT_GUIDE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Project Guide Tool not available")
+
+    try:
+        result = await create_fullstack_project(
+            project_name=request.project_name,
+            project_type=request.project_type,
+            validation_level=request.validation_level
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/project/validate")
+async def validate_project(request: ValidateProjectRequest):
+    """Valida un proyecto y aplica correcciones automáticas"""
+    if not PROJECT_GUIDE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Project Guide Tool not available")
+
+    try:
+        result = await validate_and_correct(
+            project_name=request.project_name,
+            validation_level=request.validation_level,
+            auto_correct=request.auto_correct
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/project/guidance")
+async def project_guidance(request: ProjectGuidanceRequest):
+    """Obtiene los próximos pasos y guía para el proyecto"""
+    if not PROJECT_GUIDE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Project Guide Tool not available")
+
+    try:
+        result = await get_project_guidance(request.project_name)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/project/templates")
+async def get_templates():
+    """Obtiene la lista de templates disponibles"""
+    if not PROJECT_GUIDE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Project Guide Tool not available")
+
+    return {
+        "templates": [
+            {
+                "id": "react_fastapi",
+                "name": "React + FastAPI",
+                "description": "Aplicación full stack moderna con React frontend y FastAPI backend",
+                "stack": ["React", "Vite", "TailwindCSS", "FastAPI", "SQLAlchemy", "PostgreSQL"]
+            },
+            {
+                "id": "nextjs_fastapi",
+                "name": "Next.js + FastAPI",
+                "description": "Aplicación full stack con Next.js SSR/SSG y FastAPI backend",
+                "stack": ["Next.js", "React", "TailwindCSS", "FastAPI", "SQLAlchemy"]
+            },
+            {
+                "id": "react_node_express",
+                "name": "React + Node/Express",
+                "description": "Aplicación full stack con React y Node.js/Express backend",
+                "stack": ["React", "Vite", "Node.js", "Express", "MongoDB"]
+            },
+            {
+                "id": "fullstack_monorepo",
+                "name": "Full Stack Monorepo",
+                "description": "Monorepo con múltiples apps y packages compartidos",
+                "stack": ["Turborepo", "React", "Next.js", "FastAPI", "Shared Packages"]
+            }
+        ]
+    }
+
+@app.get("/api/project/list")
+async def list_projects():
+    """Lista todos los proyectos en el workspace"""
+    if not PROJECT_GUIDE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Project Guide Tool not available")
+
+    try:
+        engine = ProjectGuideEngine()
+        workspace_path = engine.workspace_path
+
+        projects = []
+        for item in workspace_path.iterdir():
+            if item.is_dir() and (item / ".project-guide.json").exists():
+                guide_data = json.loads((item / ".project-guide.json").read_text())
+                projects.append({
+                    "name": item.name,
+                    "type": guide_data.get("type"),
+                    "phase": guide_data.get("phase"),
+                    "progress": guide_data.get("progress", 0)
+                })
+
+        return {"projects": projects}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Legacy endpoints
 @app.post("/send_message")
 async def legacy_send_message(data: dict):

@@ -3,11 +3,13 @@ import AgentPanel from './components/AgentPanel';
 import ConversationView from './components/ConversationView';
 import SystemMetrics from './components/SystemMetrics';
 import LogViewer from './components/LogViewer';
+import ProjectGuide from './components/ProjectGuide';
 import useWebSocket from './hooks/useWebSocket';
-import { Brain, Settings, PlayCircle, PauseCircle, RotateCw } from 'lucide-react';
+import { Brain, Settings, PlayCircle, PauseCircle, RotateCw, Rocket } from 'lucide-react';
 
 function App() {
   // State management
+  const [activeView, setActiveView] = useState('control'); // 'control' or 'projects'
   const [systemData, setSystemData] = useState({
     agents: {
       agent_a: {
@@ -199,9 +201,35 @@ function App() {
             </div>
             
             <div className="flex items-center space-x-4">
+              {/* View Tabs */}
+              <div className="flex bg-slate-700/50 rounded-lg p-1">
+                <button
+                  onClick={() => setActiveView('control')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                    activeView === 'control'
+                      ? 'bg-slate-600 text-white'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Brain className="w-4 h-4" />
+                  Control Cabin
+                </button>
+                <button
+                  onClick={() => setActiveView('projects')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                    activeView === 'projects'
+                      ? 'bg-slate-600 text-white'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Rocket className="w-4 h-4" />
+                  Project Guide
+                </button>
+              </div>
+
               <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-2 ${
-                connectionStatus === 'Connected' 
-                  ? 'bg-green-500/20 text-green-300 border border-green-500/30' 
+                connectionStatus === 'Connected'
+                  ? 'bg-green-500/20 text-green-300 border border-green-500/30'
                   : 'bg-red-500/20 text-red-300 border border-red-500/30'
               }`}>
                 <div className={`w-2 h-2 rounded-full ${
@@ -209,28 +237,30 @@ function App() {
                 }`}></div>
                 <span>{connectionStatus}</span>
               </div>
-              
-              <button
-                onClick={systemData.orchestrator.status === 'running' ? handlePauseSystem : handleStartSystem}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                  systemData.orchestrator.status === 'running'
-                    ? 'bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-600/30 text-yellow-300'
-                    : 'bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 text-green-300'
-                }`}
-              >
-                {systemData.orchestrator.status === 'running' ? (
-                  <>
-                    <PauseCircle className="w-4 h-4" />
-                    <span>Pause System</span>
-                  </>
-                ) : (
-                  <>
-                    <PlayCircle className="w-4 h-4" />
-                    <span>Start System</span>
-                  </>
-                )}
-              </button>
-              
+
+              {activeView === 'control' && (
+                <button
+                  onClick={systemData.orchestrator.status === 'running' ? handlePauseSystem : handleStartSystem}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                    systemData.orchestrator.status === 'running'
+                      ? 'bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-600/30 text-yellow-300'
+                      : 'bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 text-green-300'
+                  }`}
+                >
+                  {systemData.orchestrator.status === 'running' ? (
+                    <>
+                      <PauseCircle className="w-4 h-4" />
+                      <span>Pause System</span>
+                    </>
+                  ) : (
+                    <>
+                      <PlayCircle className="w-4 h-4" />
+                      <span>Start System</span>
+                    </>
+                  )}
+                </button>
+              )}
+
               <button className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-400 hover:text-white transition-colors">
                 <Settings className="w-5 h-5" />
               </button>
@@ -241,62 +271,68 @@ function App() {
 
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Agent A Panel */}
-          <div className="space-y-6">
-            <AgentPanel
-              agent="agent_a"
-              status={systemData.agents.agent_a.status}
-              lastActivity={systemData.agents.agent_a.lastActivity}
-              messagesCount={systemData.agents.agent_a.messagesCount}
-              isActive={systemData.agents.agent_a.isActive}
-              onPause={() => handleAgentPause('agent_a')}
-              onResume={() => handleAgentResume('agent_a')}
-            />
-          </div>
+        {activeView === 'control' ? (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              {/* Agent A Panel */}
+              <div className="space-y-6">
+                <AgentPanel
+                  agent="agent_a"
+                  status={systemData.agents.agent_a.status}
+                  lastActivity={systemData.agents.agent_a.lastActivity}
+                  messagesCount={systemData.agents.agent_a.messagesCount}
+                  isActive={systemData.agents.agent_a.isActive}
+                  onPause={() => handleAgentPause('agent_a')}
+                  onResume={() => handleAgentResume('agent_a')}
+                />
+              </div>
 
-          {/* Central Orchestrator */}
-          <div className="space-y-6">
-            <SystemMetrics
-              orchestratorStatus={systemData.orchestrator.status}
-              totalMessages={systemData.orchestrator.totalMessages}
-              handoffs={systemData.orchestrator.handoffs}
-              avgResponseTime={systemData.orchestrator.avgResponseTime}
-              activeSession={systemData.orchestrator.activeSession}
-              projectProgress={systemData.orchestrator.projectProgress}
-              systemHealth={systemData.orchestrator.systemHealth}
-            />
-          </div>
+              {/* Central Orchestrator */}
+              <div className="space-y-6">
+                <SystemMetrics
+                  orchestratorStatus={systemData.orchestrator.status}
+                  totalMessages={systemData.orchestrator.totalMessages}
+                  handoffs={systemData.orchestrator.handoffs}
+                  avgResponseTime={systemData.orchestrator.avgResponseTime}
+                  activeSession={systemData.orchestrator.activeSession}
+                  projectProgress={systemData.orchestrator.projectProgress}
+                  systemHealth={systemData.orchestrator.systemHealth}
+                />
+              </div>
 
-          {/* Agent B Panel */}
-          <div className="space-y-6">
-            <AgentPanel
-              agent="agent_b"
-              status={systemData.agents.agent_b.status}
-              lastActivity={systemData.agents.agent_b.lastActivity}
-              messagesCount={systemData.agents.agent_b.messagesCount}
-              isActive={systemData.agents.agent_b.isActive}
-              onPause={() => handleAgentPause('agent_b')}
-              onResume={() => handleAgentResume('agent_b')}
-            />
-          </div>
-        </div>
+              {/* Agent B Panel */}
+              <div className="space-y-6">
+                <AgentPanel
+                  agent="agent_b"
+                  status={systemData.agents.agent_b.status}
+                  lastActivity={systemData.agents.agent_b.lastActivity}
+                  messagesCount={systemData.agents.agent_b.messagesCount}
+                  isActive={systemData.agents.agent_b.isActive}
+                  onPause={() => handleAgentPause('agent_b')}
+                  onResume={() => handleAgentResume('agent_b')}
+                />
+              </div>
+            </div>
 
-        {/* Bottom Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Conversation View */}
-          <ConversationView
-            messages={systemData.conversations}
-            agentA="agent_a"
-            agentB="agent_b"
-          />
+            {/* Bottom Section */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              {/* Conversation View */}
+              <ConversationView
+                messages={systemData.conversations}
+                agentA="agent_a"
+                agentB="agent_b"
+              />
 
-          {/* Log Viewer */}
-          <LogViewer
-            logs={systemData.logs}
-            onClearLogs={handleClearLogs}
-          />
-        </div>
+              {/* Log Viewer */}
+              <LogViewer
+                logs={systemData.logs}
+                onClearLogs={handleClearLogs}
+              />
+            </div>
+          </>
+        ) : (
+          <ProjectGuide />
+        )}
       </div>
     </div>
   );
